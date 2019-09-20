@@ -27,6 +27,7 @@ public class Coupon implements Serializable {
 	@Column(name = "price", unique = false, nullable = false)
     private float price;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "type", unique = false, nullable = false)
     private CouponsCategories type;
 

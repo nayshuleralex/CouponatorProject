@@ -20,6 +20,7 @@ public class User implements Serializable {
 	@Column(name = "password", unique = false, nullable = false)
 	private String password;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "type", unique = false, nullable = false)
 	private UserType type;
 
