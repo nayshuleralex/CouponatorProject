@@ -6,10 +6,10 @@ public enum UserType {
     COMPANY;
 
 
-    public static boolean contains(String userType) {
+    public static boolean contains(UserType userType) {
 
         for (UserType u : UserType.values()) {
-            if (u.name().equalsIgnoreCase(userType)) {
+            if (u.name().equalsIgnoreCase(String.valueOf(userType))) {
                 return true;
             }
         }

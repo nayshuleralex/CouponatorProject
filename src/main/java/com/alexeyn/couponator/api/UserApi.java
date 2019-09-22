@@ -2,6 +2,8 @@ package com.alexeyn.couponator.api;
 
 import java.util.List;
 
+import com.alexeyn.couponator.data.LoginResponseDataObject;
+import com.alexeyn.couponator.data.UserLoginDetailsDataObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +52,11 @@ public class UserApi {
 	@DeleteMapping("/{userId}")
 	public void deleteUser(@PathVariable("userId") long id) throws ApplicationException {
 		this.userController.deleteUser(id);
+	}
+
+	@PostMapping("/login") //change to GetMapping ???
+	public LoginResponseDataObject login(@RequestBody UserLoginDetailsDataObject userLoginDetails) throws ApplicationException {
+		return this.userController.login(userLoginDetails.getUserName(), userLoginDetails.getPassword());
 	}
 
 	/*public boolean isUserExist(String userName) throws ApplicationException {

@@ -1,10 +1,17 @@
 package com.alexeyn.couponator.logic;
 
 import java.util.List;
+import java.util.Random;
 
+import com.alexeyn.couponator.cache.ICacheController;
+import com.alexeyn.couponator.data.LoggedInUserData;
+import com.alexeyn.couponator.data.LoginResponseDataObject;
 import com.alexeyn.couponator.entities.User;
 import com.alexeyn.couponator.dao.IUserDao;
+import com.alexeyn.couponator.enums.ErrorTypes;
+import com.alexeyn.couponator.enums.UserType;
 import com.alexeyn.couponator.exceptions.ApplicationException;
+import com.alexeyn.couponator.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -12,6 +19,9 @@ import org.springframework.stereotype.Controller;
 public class UserController {
     @Autowired
     private IUserDao userDao;
+
+    @Autowired
+    private ICacheController cacheController;
 
 
     public long createUser(User user) throws ApplicationException {
@@ -28,6 +38,7 @@ public class UserController {
     }
 
     public List<User> getAllUsers() throws ApplicationException {
+        validateUserTable();
         return (List<User>) userDao.findAll();
     }
 
@@ -39,7 +50,97 @@ public class UserController {
         userDao.deleteById(userId);
     }
 
-/*    public boolean isUserExists(long userId) throws ApplicationException {
+    public LoginResponseDataObject login(String userName, String password) throws ApplicationException {
+        LoggedInUserData loggedInUserData = userDao.login(userName, password);
+        if (loggedInUserData == null) {
+            throw new ApplicationException(ErrorTypes.LOGIN_FAILED, "Failed to login user: " + userName);
+        }
+        int token = generateToken(userName, loggedInUserData);
+
+        // Save login user data in cache
+        cacheController.put(token, loggedInUserData);
+
+        LoginResponseDataObject loginResponseDataObject = new LoginResponseDataObject(token, loggedInUserData.getUserType());
+
+        return loginResponseDataObject;
+    }
+
+    private int generateToken(String userName, LoggedInUserData loggedInUserData) {
+        Random rnd = new Random();
+        String salt = "#####";
+        int token = (userName + rnd.nextInt(9999999) + salt + loggedInUserData.getUserId()).hashCode();
+        return token;
+    }
+
+    private void validateUserTable() throws ApplicationException {
+        List<User> userList = (List<User>) userDao.findAll();
+        if (userList.isEmpty()) {
+            throw new ApplicationException(ErrorTypes.EMPTY_TABLE, DateUtils.getCurrentDateAndTime() +
+                    ": User table is empty.");
+        }
+    }
+
+    private void validateUser(User user) throws ApplicationException {
+        validateUserTable();
+        List<User> userList = (List<User>) userDao.findAll();
+        if (user == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": user is null");
+        }
+        if (user.getUserId() != null) {
+            throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
+                    DateUtils.getCurrentDateAndTime() +
+                    "Id is redundant");
+        }
+        if (user.getUsername() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": username is null");
+        }
+        if (user.getUsername().isEmpty()) {
+            throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": username is empty");
+        }
+        if (user.getPassword() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": password is null");
+        }
+        if (user.getPassword().isEmpty()) {
+            throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": password is empty");
+        }
+        if (isStrongPassword(user.getPassword())) {
+            throw new ApplicationException(ErrorTypes.INCORRECT_PASSWORD,
+                    DateUtils.getCurrentDateAndTime() + ": Password " + user.getUsername() + " is not strong");
+        }
+        if (user.getType() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": user type is null");
+        }
+        if (!UserType.contains(user.getType())) {
+            throw new ApplicationException(ErrorTypes.USER_TYPE_DOES_NOT_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": user type doesn't exist");
+        }
+        if (userList.contains(user)) {
+            throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
+                    DateUtils.getCurrentDateAndTime() + "User " + user.getUsername() + " already exist");
+        }
+
+    }
+
+    private boolean isStrongPassword(String password) {
+        String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}";
+        if (password.length() < 6) {
+            return false;
+        }
+        if (!password.matches(pattern)) {
+            return false;
+        }
+        return true;
+    }
+
+
+
+    /*public boolean isUserExists(long userId) throws ApplicationException {
         if (this.userDao.isUserExist(userId)) {
             return true;
         }

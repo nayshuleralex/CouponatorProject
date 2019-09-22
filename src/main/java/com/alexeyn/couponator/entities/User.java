@@ -12,7 +12,7 @@ public class User implements Serializable {
 	@Id
 	@GeneratedValue
 	@Column(name = "userId")
-	private long userId;
+	private Long userId;
 
 	@Column(name = "username", unique = true, nullable = false)
 	private String username;
@@ -24,7 +24,7 @@ public class User implements Serializable {
 	@Column(name = "type", unique = false, nullable = false)
 	private UserType type;
 
-	@Column(name = "companyId", unique = true, nullable = true)
+	@Column(name = "companyId", unique = true, nullable = false)
 	private Long companyId;
 
 	@OneToOne
@@ -51,16 +51,16 @@ public class User implements Serializable {
 	}
 
 	// Full constructor with id
-	public User(long userId, String username, String password, UserType type, long companyId) {
+	public User(Long userId, String username, String password, UserType type, long companyId) {
 		this(username, password, type, companyId);
 		this.userId = userId;
 	}
 
-	public long getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(long userId) {
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 
