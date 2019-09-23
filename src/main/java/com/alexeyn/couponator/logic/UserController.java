@@ -60,16 +60,13 @@ public class UserController {
         // Save login user data in cache
         cacheController.put(token, loggedInUserData);
 
-        LoginResponseDataObject loginResponseDataObject = new LoginResponseDataObject(token, loggedInUserData.getUserType());
-
-        return loginResponseDataObject;
+        return new LoginResponseDataObject(token, loggedInUserData.getUserType());
     }
 
     private int generateToken(String userName, LoggedInUserData loggedInUserData) {
         Random rnd = new Random();
         String salt = "#####";
-        int token = (userName + rnd.nextInt(9999999) + salt + loggedInUserData.getUserId()).hashCode();
-        return token;
+        return (userName + rnd.nextInt(9999999) + salt + loggedInUserData.getUserId()).hashCode();
     }
 
     private void validateUserTable() throws ApplicationException {
@@ -89,8 +86,7 @@ public class UserController {
         }
         if (user.getUserId() != null) {
             throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
-                    DateUtils.getCurrentDateAndTime() +
-                    "Id is redundant");
+                    DateUtils.getCurrentDateAndTime() + "Id is redundant");
         }
         if (user.getUsername() == null) {
             throw new ApplicationException(ErrorTypes.NULL_DATA,
@@ -118,7 +114,7 @@ public class UserController {
         }
         if (!UserType.contains(user.getType())) {
             throw new ApplicationException(ErrorTypes.USER_TYPE_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": user type doesn't exist");
+                    DateUtils.getCurrentDateAndTime() + ": user type " + user.getType() + " doesn't exist");
         }
         if (userList.contains(user)) {
             throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,

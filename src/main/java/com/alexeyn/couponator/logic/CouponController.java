@@ -4,42 +4,145 @@ import java.util.List;
 
 import com.alexeyn.couponator.entities.Coupon;
 import com.alexeyn.couponator.dao.ICouponDao;
+import com.alexeyn.couponator.enums.CouponsCategories;
+import com.alexeyn.couponator.enums.ErrorTypes;
 import com.alexeyn.couponator.exceptions.ApplicationException;
+import com.alexeyn.couponator.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller
 public class CouponController {
 
-	@Autowired
-	private ICouponDao couponDao;
+    @Autowired
+    private ICouponDao couponDao;
 
-	public long createCoupon(Coupon coupon) throws ApplicationException {
-		Coupon c = couponDao.save(coupon);
-		return c.getCouponId();
+    public long createCoupon(Coupon coupon) throws ApplicationException {
+    	validateCoupon(coupon);
+    	validateCouponId(coupon.getCouponId()); // validate provided id is NULL
+    	validateCouponDoesNotExist(couponDao.findCouponId(coupon.getTitle()));
+        return couponDao.save(coupon).getCouponId();
+    }
+
+    public Coupon getCoupon(long couponId) throws ApplicationException {
+    	validateTable();
+    	validateCouponExist(couponId);
+        return couponDao.findById(couponId).get();
+    }
+
+    public List<Coupon> getAllCoupons() throws ApplicationException {
+        return (List<Coupon>) couponDao.findAll();
+    }
+
+    public List<Coupon> getAllCoupons(long companyId) throws ApplicationException {
+    	validateTable();
+        return (List<Coupon>) couponDao.findAllByCompanyId(companyId);
+    }
+
+    public void updateCoupon(Coupon coupon) throws ApplicationException {
+    	validateTable();
+    	validateCoupon(coupon);
+    	validateUpdateCoupon(coupon);
+        couponDao.save(coupon);
+    }
+
+    public void deleteCoupon(long couponId) throws ApplicationException {
+    	validateTable();
+    	validateCouponExist(couponId);
+        couponDao.deleteById(couponId);
+    }
+
+
+    private void validateTable() throws ApplicationException {
+        if (couponDao.findAll() == null) {
+            throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
+                    DateUtils.getCurrentDateAndTime() + ": Coupon Table is empty");
+        }
+    }
+
+    private void validateCouponId(Long couponId) throws ApplicationException {
+		if (couponId != null) {
+			throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Id is redundant");
+		}
 	}
 
-	public Coupon getCoupon(long couponId) throws ApplicationException {
-		return couponDao.findById(couponId).get();
+    private void validateCouponExist(Long couponId) throws ApplicationException {
+    	if (!couponDao.findById(couponId).isPresent()) {
+    		throw new ApplicationException(ErrorTypes.COUPON_DOES_NOT_EXIST,
+					DateUtils.getCurrentDateAndTime() + ": Coupon doesn't exist");
+		}
+    }
+
+    private void validateCouponDoesNotExist(Long couponId) throws ApplicationException {
+		if (couponDao.findById(couponId).isPresent()) {
+			throw new ApplicationException(ErrorTypes.COUPON_ALREADY_EXIST,
+					DateUtils.getCurrentDateAndTime() + ": Coupon already exist");
+		}
+    }
+
+	private void validateUpdateCoupon(Coupon updatedCoupon) throws ApplicationException {
+		if (updatedCoupon.getCompanyId() == null) {
+			throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
+					DateUtils.getCurrentDateAndTime() + ": Cannot update coupon id wasn't provided");
+		}
+		Coupon currentCoupon = couponDao.findById(updatedCoupon.getCompanyId()).get();
+		if (currentCoupon.equals(updatedCoupon)) {
+			throw new ApplicationException(ErrorTypes.UPDATE_FAILED,
+					DateUtils.getCurrentDateAndTime() + ": No difference found between old and new data");
+		}
 	}
 
-	public List<Coupon> getAllCoupons() throws ApplicationException {
-		return (List<Coupon>) couponDao.findAll();
-	}
-
-	public List<Coupon> getAllCoupons(long companyId) throws ApplicationException {
-		return (List<Coupon>) couponDao.findAllByCompanyId(companyId);
-	}
-
-
-
-	public void updateCoupon(Coupon coupon) throws ApplicationException {
-		couponDao.save(coupon);
-	}
-
-	public void deleteCoupon(long couponId) throws ApplicationException {
-		couponDao.deleteById(couponId);
-	}
+    private void validateCoupon(Coupon coupon) throws ApplicationException {
+        if (coupon == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Coupon is null");
+        }
+        if (coupon.getTitle() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Title is null");
+        }
+        if (coupon.getTitle().isEmpty()) {
+            throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Title is empty");
+        }
+        if (coupon.getDescription() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Description is null");
+        }
+        if (coupon.getDescription().isEmpty()) {
+            throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Description is empty");
+        }
+        if (coupon.getPrice() <= 0) {
+            throw new ApplicationException(ErrorTypes.INVALID_PRICE,
+                    DateUtils.getCurrentDateAndTime() + ": Invalid Price");
+        }
+        if (coupon.getAmount() <= 0) {
+            throw new ApplicationException(ErrorTypes.INVALID_AMOUNT,
+                    DateUtils.getCurrentDateAndTime() + ": Invalid amount");
+        }
+        if (coupon.getStartDate() == null || coupon.getEndDate() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Null date(s)");
+        }
+        if (coupon.getStartDate().after(coupon.getEndDate())) {
+            throw new ApplicationException(ErrorTypes.INVALID_DATES,
+                    DateUtils.getCurrentDateAndTime() + ": StartDate is after EndDate");
+        }
+        if (coupon.getType() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": Null or Empty Type");
+        }
+        if (!CouponsCategories.contains(coupon.getType())) {
+            throw new ApplicationException(ErrorTypes.COUPON_TYPE_DOES_NOT_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": Coupon type " + coupon.getType() + " doesn't exist");
+        }
+        if (coupon.getCompanyId() == null) {
+            throw new ApplicationException(ErrorTypes.INVALID_ID,
+                    DateUtils.getCurrentDateAndTime() + ": Invalid CompanyID");
+        }
+    }
 
 	/*public List<Coupon> getAllCoupons(long companyId) throws ApplicationException {
 		return (List<Coupon>) couponDao.findAllById(companyId);

@@ -13,7 +13,7 @@ public class Coupon implements Serializable {
 	@Id
 	@GeneratedValue
 	@Column(name = "couponId")
-    private long couponId;
+    private Long couponId;
 
 	@Column(name = "title", unique = true, nullable = false)
     private String title;
@@ -38,7 +38,7 @@ public class Coupon implements Serializable {
     private int amount;
 
 	@Column(name = "companyId", unique = false, nullable = false)
-    private long companyId;
+    private Long companyId;
 
 	@ManyToOne
 	private Company company;
@@ -52,7 +52,7 @@ public class Coupon implements Serializable {
 
     // Full constructor without id
 	public Coupon(String title, Date startDate, Date endDate, float price, CouponsCategories type, String description, int amount,
-				  long companyId) {
+				  Long companyId) {
 		this.title = title;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -65,16 +65,16 @@ public class Coupon implements Serializable {
 
 	// Full constructor with id
     public Coupon(long couponId, String title, Date startDate, Date endDate, float price, CouponsCategories type, String description,
-                  int amount, long companyId) {
+                  int amount, Long companyId) {
     	this(title, startDate, endDate, price, type, description, amount, companyId);
         this.couponId = couponId;
     }
 
-    public long getCouponId() {
+    public Long getCouponId() {
         return couponId;
     }
 
-    public void setCouponId(long couponId) {
+    public void setCouponId(Long couponId) {
         this.couponId = couponId;
     }
 
@@ -134,11 +134,11 @@ public class Coupon implements Serializable {
         this.amount = amount;
     }
 
-    public long getCompanyId() {
+    public Long getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(long companyId) {
+    public void setCompanyId(Long companyId) {
         this.companyId = companyId;
     }
 

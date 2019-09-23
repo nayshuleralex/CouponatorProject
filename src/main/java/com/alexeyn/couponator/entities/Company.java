@@ -12,12 +12,12 @@ public class Company implements Serializable {
     @Id
     @GeneratedValue
     @Column(name = "companyId")
-    private long companyId;
+    private Long companyId;
 
     @Column(name = "companyName", unique = true, nullable = false)
     private String companyName;
 
-    @Column(name = "address", unique = false, nullable = false)
+    @Column(name = "address", nullable = false)
     private String address;
 
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "companyId", fetch = FetchType.LAZY)
@@ -33,7 +33,7 @@ public class Company implements Serializable {
     }
 
     // Full constructor without id
-    public Company(long companyId, String companyName, String address) {
+    public Company(Long companyId, String companyName, String address) {
         this(companyName, address);
         this.companyId = companyId;
     }
@@ -44,11 +44,11 @@ public class Company implements Serializable {
         this.address = address;
     }
 
-    public long getCompanyId() {
+    public Long getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(long companyId) {
+    public void setCompanyId(Long companyId) {
         this.companyId = companyId;
     }
 
@@ -67,7 +67,6 @@ public class Company implements Serializable {
     public void setAddress(String address) {
         this.address = address;
     }
-
 
     @Override
     public String toString() {

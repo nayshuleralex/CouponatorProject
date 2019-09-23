@@ -7,10 +7,10 @@ public enum CouponsCategories {
     VACATION,
     HOBBY;
 
-    public static boolean contains(String couponCategory) {
+    public static boolean contains(CouponsCategories couponCategory) {
 
         for (CouponsCategories c : CouponsCategories.values()) {
-            if (c.name().equalsIgnoreCase(couponCategory)) {
+            if (c.name().equalsIgnoreCase(String.valueOf(couponCategory))) {
                 return true;
             }
         }
