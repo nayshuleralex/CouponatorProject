@@ -38,12 +38,12 @@ public class CompanyController {
     public void updateCompany(Company company) throws ApplicationException {
         validateTable();
         validateCompany(company);
-        validateUpdateCompany(company);
-        validateCompanyExist(companyDao.findCompanyId(company.getCompanyName()));
+		validateCompanyExist(company.getCompanyId());
+		validateUpdateCompany(company);
         companyDao.save(company);
     }
 
-    public void deleteCompany(long companyId) throws ApplicationException {
+    public void deleteCompany(Long companyId) throws ApplicationException {
         validateTable();
         validateCompanyExist(companyId);
         companyDao.deleteById(companyId);
@@ -57,7 +57,11 @@ public class CompanyController {
         }
     }
 
-    private void validateCompanyExist(long companyId) throws ApplicationException {
+    private void validateCompanyExist(Long companyId) throws ApplicationException {
+		if (companyId == null) {
+			throw new ApplicationException(ErrorTypes.NULL_DATA,
+					DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
+		}
         if (!companyDao.findById(companyId).isPresent()) {
             throw new ApplicationException(ErrorTypes.COMPANY_DOES_NOT_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": Company doesn't exist");

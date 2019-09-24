@@ -25,28 +25,42 @@ public class UserController {
 
 
     public long createUser(User user) throws ApplicationException {
-        User u = userDao.save(user);
-        return u.getUserId();
+        validateTable();
+        validateUserId(user.getUserId(), false);
+        validateUser(user);
+        validateUserDoesNotExist(user.getUserId());
+        return userDao.save(user).getUserId();
     }
 
-    public User getUser(long userId) throws ApplicationException {
+    public User getUser(Long userId) throws ApplicationException {
+        validateTable();
+        validateUserExist(userId);
         return userDao.findById(userId).get();
     }
 
     public User getUser(String username) throws ApplicationException {
+        validateTable();
+        validateUserExist(userDao.findByUsername(username).getUserId());
         return userDao.findByUsername(username);
     }
 
     public List<User> getAllUsers() throws ApplicationException {
-        validateUserTable();
+        validateTable();
         return (List<User>) userDao.findAll();
     }
 
     public void updateUser(User user) throws ApplicationException {
+        validateTable();
+        validateUser(user);
+        validateUserId(user.getUserId(), true);
+        validateUserExist(user.getUserId());
+        validateUpdateUser(user);
         userDao.save(user);
     }
 
     public void deleteUser(long userId) throws ApplicationException {
+        validateTable();
+        validateUserExist(userId);
         userDao.deleteById(userId);
     }
 
@@ -63,30 +77,70 @@ public class UserController {
         return new LoginResponseDataObject(token, loggedInUserData.getUserType());
     }
 
+    private void validateUserExist(Long userId) throws ApplicationException {
+        if (userId == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
+        }
+        if (!userDao.findById(userId).isPresent()) {
+            throw new ApplicationException(ErrorTypes.USER_DOES_NOT_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": User doesn't exist");
+        }
+    }
+
+    private void validateUserDoesNotExist(Long userId) throws ApplicationException {
+        if (userDao.findById(userId).isPresent()) {
+            throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": User already exist");
+        }
+    }
+
+    private void validateUpdateUser(User updatedUser) throws ApplicationException {
+        if (updatedUser.getUserId() == null) {
+            throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": Cannot update user. Id wasn't provided");
+        }
+        User currentUser = userDao.findById(updatedUser.getUserId()).get();
+        if (currentUser.equals(updatedUser)) {
+            throw new ApplicationException(ErrorTypes.UPDATE_FAILED,
+                    DateUtils.getCurrentDateAndTime() + ": No difference found between old and new data");
+        }
+    }
+
     private int generateToken(String userName, LoggedInUserData loggedInUserData) {
         Random rnd = new Random();
         String salt = "#####";
         return (userName + rnd.nextInt(9999999) + salt + loggedInUserData.getUserId()).hashCode();
     }
 
-    private void validateUserTable() throws ApplicationException {
+    private void validateTable() throws ApplicationException {
         List<User> userList = (List<User>) userDao.findAll();
         if (userList.isEmpty()) {
-            throw new ApplicationException(ErrorTypes.EMPTY_TABLE, DateUtils.getCurrentDateAndTime() +
-                    ": User table is empty.");
+            throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
+                    DateUtils.getCurrentDateAndTime() + ": User table is empty.");
+        }
+    }
+
+    private void validateUserId(Long userId, boolean isRequired) throws ApplicationException {
+        if (isRequired) {
+            if (userId == null) {
+                throw new ApplicationException(ErrorTypes.NULL_DATA,
+                        DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
+            }
+        } else {
+            if (userId != null) {
+                throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
+                        DateUtils.getCurrentDateAndTime() + "Id is redundant");
+            }
         }
     }
 
     private void validateUser(User user) throws ApplicationException {
-        validateUserTable();
+        validateTable();
         List<User> userList = (List<User>) userDao.findAll();
         if (user == null) {
             throw new ApplicationException(ErrorTypes.NULL_DATA,
                     DateUtils.getCurrentDateAndTime() + ": user is null");
-        }
-        if (user.getUserId() != null) {
-            throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
-                    DateUtils.getCurrentDateAndTime() + "Id is redundant");
         }
         if (user.getUsername() == null) {
             throw new ApplicationException(ErrorTypes.NULL_DATA,
@@ -133,45 +187,4 @@ public class UserController {
         }
         return true;
     }
-
-
-
-    /*public boolean isUserExists(long userId) throws ApplicationException {
-        if (this.userDao.isUserExist(userId)) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isUserExistsByName(String username) throws ApplicationException {
-        if (this.userDao.isUserExist(username)) {
-            return true;
-        }
-        return false;
-    }
-
-    private void ValidateUser(User user) throws ApplicationException {
-        if (user == null) {
-            throw new ApplicationException(ErrorTypes.NULL_DATA, "Null user");
-        }
-        if (user.getUsername() == null) {
-            throw new ApplicationException(ErrorTypes.NULL_DATA, "Null username");
-        }
-        if (user.getUsername().isEmpty()) {
-            throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty username");
-        }
-        if (user.getPassword() == null) {
-            throw new ApplicationException(ErrorTypes.NULL_DATA, "Null password");
-        }
-        if (user.getPassword().isEmpty()) {
-            throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty password");
-        }
-        if (user.getType() == null) {
-            throw new ApplicationException(ErrorTypes.NULL_DATA, "Null User Type");
-        }
-        if (user.getId() < 0) {
-            throw new ApplicationException(ErrorTypes.INVALID_ID, "Invalid ID");
-        }
-    }*/
-
 }

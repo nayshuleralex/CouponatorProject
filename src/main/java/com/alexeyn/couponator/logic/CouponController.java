@@ -19,7 +19,7 @@ public class CouponController {
 
     public long createCoupon(Coupon coupon) throws ApplicationException {
     	validateCoupon(coupon);
-    	validateCouponId(coupon.getCouponId()); // validate provided id is NULL
+    	validateCouponId(coupon.getCouponId(), false); // validate provided id is NULL
     	validateCouponDoesNotExist(couponDao.findCouponId(coupon.getTitle()));
         return couponDao.save(coupon).getCouponId();
     }
@@ -42,6 +42,8 @@ public class CouponController {
     public void updateCoupon(Coupon coupon) throws ApplicationException {
     	validateTable();
     	validateCoupon(coupon);
+    	validateCouponId(coupon.getCouponId(), true);
+    	validateCouponExist(coupon.getCouponId());
     	validateUpdateCoupon(coupon);
         couponDao.save(coupon);
     }
@@ -60,11 +62,18 @@ public class CouponController {
         }
     }
 
-    private void validateCouponId(Long couponId) throws ApplicationException {
-		if (couponId != null) {
-			throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
-					DateUtils.getCurrentDateAndTime() + ": Id is redundant");
-		}
+    private void validateCouponId(Long couponId, boolean isRequired) throws ApplicationException {
+        if (isRequired) {
+            if (couponId == null) {
+                throw new ApplicationException(ErrorTypes.NULL_DATA,
+                        DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
+            }
+        } else {
+            if (couponId != null) {
+                throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
+                        DateUtils.getCurrentDateAndTime() + ": Id is redundant");
+            }
+        }
 	}
 
     private void validateCouponExist(Long couponId) throws ApplicationException {
@@ -82,10 +91,6 @@ public class CouponController {
     }
 
 	private void validateUpdateCoupon(Coupon updatedCoupon) throws ApplicationException {
-		if (updatedCoupon.getCompanyId() == null) {
-			throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
-					DateUtils.getCurrentDateAndTime() + ": Cannot update coupon id wasn't provided");
-		}
 		Coupon currentCoupon = couponDao.findById(updatedCoupon.getCompanyId()).get();
 		if (currentCoupon.equals(updatedCoupon)) {
 			throw new ApplicationException(ErrorTypes.UPDATE_FAILED,

@@ -12,13 +12,13 @@ public class Customer implements Serializable {
     @Column(name = "customerId", unique = true, nullable = false)
     private long customerId;
 
-    @Column(name = "firstName", unique = false, nullable = false)
+    @Column(name = "firstName", nullable = false)
     private String firstName;
 
-    @Column(name = "lastName", unique = false, nullable = false)
+    @Column(name = "lastName", nullable = false)
     private String lastName;
 
-    @Column(name = "address", unique = false, nullable = false)
+    @Column(name = "address", nullable = false)
     private String address;
 
     @Column(name = "email", unique = true, nullable = false)
