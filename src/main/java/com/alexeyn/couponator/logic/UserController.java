@@ -77,36 +77,6 @@ public class UserController {
         return new LoginResponseDataObject(token, loggedInUserData.getUserType());
     }
 
-    private void validateUserExist(Long userId) throws ApplicationException {
-        if (userId == null) {
-            throw new ApplicationException(ErrorTypes.NULL_DATA,
-                    DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
-        }
-        if (!userDao.findById(userId).isPresent()) {
-            throw new ApplicationException(ErrorTypes.USER_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": User doesn't exist");
-        }
-    }
-
-    private void validateUserDoesNotExist(Long userId) throws ApplicationException {
-        if (userDao.findById(userId).isPresent()) {
-            throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": User already exist");
-        }
-    }
-
-    private void validateUpdateUser(User updatedUser) throws ApplicationException {
-        if (updatedUser.getUserId() == null) {
-            throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": Cannot update user. Id wasn't provided");
-        }
-        User currentUser = userDao.findById(updatedUser.getUserId()).get();
-        if (currentUser.equals(updatedUser)) {
-            throw new ApplicationException(ErrorTypes.UPDATE_FAILED,
-                    DateUtils.getCurrentDateAndTime() + ": No difference found between old and new data");
-        }
-    }
-
     private int generateToken(String userName, LoggedInUserData loggedInUserData) {
         Random rnd = new Random();
         String salt = "#####";
@@ -114,8 +84,7 @@ public class UserController {
     }
 
     private void validateTable() throws ApplicationException {
-        List<User> userList = (List<User>) userDao.findAll();
-        if (userList.isEmpty()) {
+        if (userDao.findAll() == null) {
             throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
                     DateUtils.getCurrentDateAndTime() + ": User table is empty.");
         }
@@ -132,6 +101,28 @@ public class UserController {
                 throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
                         DateUtils.getCurrentDateAndTime() + "Id is redundant");
             }
+        }
+    }
+
+    private void validateUserExist(Long userId) throws ApplicationException {
+        if (!userDao.findById(userId).isPresent()) {
+            throw new ApplicationException(ErrorTypes.USER_DOES_NOT_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": User doesn't exist");
+        }
+    }
+
+    private void validateUserDoesNotExist(Long userId) throws ApplicationException {
+        if (userDao.findById(userId).isPresent()) {
+            throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
+                    DateUtils.getCurrentDateAndTime() + ": User already exist");
+        }
+    }
+
+    private void validateUpdateUser(User updatedUser) throws ApplicationException {
+        User currentUser = userDao.findById(updatedUser.getUserId()).get();
+        if (currentUser.equals(updatedUser)) {
+            throw new ApplicationException(ErrorTypes.UPDATE_FAILED,
+                    DateUtils.getCurrentDateAndTime() + ": No difference found between old and new data");
         }
     }
 
@@ -182,9 +173,6 @@ public class UserController {
         if (password.length() < 6) {
             return false;
         }
-        if (!password.matches(pattern)) {
-            return false;
-        }
-        return true;
+        return password.matches(pattern);
     }
 }

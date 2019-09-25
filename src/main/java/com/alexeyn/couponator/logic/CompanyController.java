@@ -19,7 +19,7 @@ public class CompanyController {
 
     public long createCompany(Company company) throws ApplicationException {
         validateCompany(company);
-        validateCompanyId(company.getCompanyId());
+        validateCompanyId(company.getCompanyId(), false);
         validateCompanyDoesNotExist(companyDao.findCompanyId(company.getCompanyName()));
         return companyDao.save(company).getCompanyId();
     }
@@ -38,6 +38,7 @@ public class CompanyController {
     public void updateCompany(Company company) throws ApplicationException {
         validateTable();
         validateCompany(company);
+        validateCompanyId(company.getCompanyId(), true);
 		validateCompanyExist(company.getCompanyId());
 		validateUpdateCompany(company);
         companyDao.save(company);
@@ -50,18 +51,27 @@ public class CompanyController {
     }
 
     private void validateTable() throws ApplicationException {
-        List<Company> companies = (List<Company>) companyDao.findAll();
-        if (companies == null) {
+        if (companyDao.findAll() == null) {
             throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
                     DateUtils.getCurrentDateAndTime() + ": Empty company table");
         }
     }
 
-    private void validateCompanyExist(Long companyId) throws ApplicationException {
-		if (companyId == null) {
-			throw new ApplicationException(ErrorTypes.NULL_DATA,
-					DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
+	private void validateCompanyId(Long companyId, boolean isRequired) throws ApplicationException {
+		if (isRequired) {
+			if (companyId == null) {
+				throw new ApplicationException(ErrorTypes.NULL_DATA,
+						DateUtils.getCurrentDateAndTime() + ": customerId is not supplied");
+			}
+		} else {
+			if (companyId != null) {
+				throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
+						DateUtils.getCurrentDateAndTime() + ": companyId is redundant");
+			}
 		}
+	}
+
+    private void validateCompanyExist(Long companyId) throws ApplicationException {
         if (!companyDao.findById(companyId).isPresent()) {
             throw new ApplicationException(ErrorTypes.COMPANY_DOES_NOT_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": Company doesn't exist");
@@ -75,18 +85,7 @@ public class CompanyController {
         }
     }
 
-    private void validateCompanyId(Long companyId) throws ApplicationException {
-		if (companyId != null) {
-			throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
-					DateUtils.getCurrentDateAndTime() + "Id is redundant");
-		}
-	}
-
     private void validateUpdateCompany(Company updatedCompany) throws ApplicationException {
-        if (updatedCompany.getCompanyId() == null) {
-            throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": Cannot update company id wasn't provided");
-        }
         Company currentCompany = companyDao.findById(updatedCompany.getCompanyId()).get();
         if (currentCompany.equals(updatedCompany)) {
             throw new ApplicationException(ErrorTypes.UPDATE_FAILED,

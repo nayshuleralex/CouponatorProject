@@ -58,11 +58,11 @@ public class Customer implements Serializable {
         this(user, firstName, lastName, address, email);
         this.customerId = customerId;
     }
-    public long getId() {
+    public long getCustomerId() {
         return customerId;
     }
 
-    public void setId(long userId) {
+    public void setCustomerId(long userId) {
         this.customerId = userId;
     }
 

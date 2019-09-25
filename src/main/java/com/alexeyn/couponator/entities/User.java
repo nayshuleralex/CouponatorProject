@@ -17,11 +17,11 @@ public class User implements Serializable {
 	@Column(name = "username", unique = true, nullable = false)
 	private String username;
 
-	@Column(name = "password", unique = false, nullable = false)
+	@Column(name = "password", nullable = false)
 	private String password;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "type", unique = false, nullable = false)
+	@Column(name = "type", nullable = false)
 	private UserType type;
 
 	@Column(name = "companyId", unique = true, nullable = false)

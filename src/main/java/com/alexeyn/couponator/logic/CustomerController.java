@@ -3,7 +3,6 @@ package com.alexeyn.couponator.logic;
 import java.util.List;
 
 import com.alexeyn.couponator.entities.Customer;
-import com.alexeyn.couponator.entities.User;
 import com.alexeyn.couponator.dao.ICustomerDao;
 import com.alexeyn.couponator.enums.ErrorTypes;
 import com.alexeyn.couponator.exceptions.ApplicationException;
@@ -19,12 +18,17 @@ public class CustomerController {
 	private UserController userController;
 
 	public long createCustomer(Customer customer) throws ApplicationException {
+		validateCustomer(customer);
+		validateCustomerId(customer.getCustomerId(), false);
+		validateCustomerDoesNotExist(customerDao.findCustomerId(customer.getEmail()));
 		long userId = userController.createUser(customer.getUser());
-		customer.setId(userId);
-		return customerDao.save(customer).getId();
+		customer.setCustomerId(userId);
+		return customerDao.save(customer).getCustomerId();
 	}
 
 	public Customer getCustomer(long customerId) throws ApplicationException {
+		validateTable();
+		validateCustomerExist(customerId);
 		return customerDao.findById(customerId).get();
 	}
 
@@ -33,10 +37,17 @@ public class CustomerController {
 	}
 
 	public void updateCustomer(Customer customer) throws ApplicationException {
+		validateTable();
+		validateCustomer(customer);
+		validateCustomerId(customer.getCustomerId(), true);
+		validateCustomerExist(customer.getCustomerId());
+		validateUpdateCustomer(customer);
 		customerDao.save(customer);
 	}
 
 	public void deleteCustomer(long customerId) throws ApplicationException {
+		validateTable();
+		validateCustomerExist(customerId);
 		customerDao.deleteById(customerId);
 	}
 
@@ -76,7 +87,7 @@ public class CustomerController {
 	}
 
 	private void validateUpdateCustomer(Customer updatedCustomer) throws ApplicationException {
-		Customer currentCustomer = customerDao.findById(updatedCustomer.getId()).get();
+		Customer currentCustomer = customerDao.findById(updatedCustomer.getCustomerId()).get();
 		if (currentCustomer.equals(updatedCustomer)) {
 			throw new ApplicationException(ErrorTypes.UPDATE_FAILED,
 					DateUtils.getCurrentDateAndTime() + ": No difference found between old and new data");
@@ -86,63 +97,36 @@ public class CustomerController {
 	private void validateCustomer(Customer customer) throws ApplicationException {
 		if (customer == null) {
 			throw new ApplicationException(ErrorTypes.NULL_DATA,
-					DateUtils.getCurrentDateAndTime() + ": Coupon is null");
+					DateUtils.getCurrentDateAndTime() + ": Customer is null");
 		}
 		if (customer.getFirstName() == null) {
-			throw new ApplicationException(ErrorTypes.NULL_DATA, "Null first name");
+			throw new ApplicationException(ErrorTypes.NULL_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Null first name");
 		}
 		if (customer.getFirstName().isEmpty()) {
-			throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty first name");
+			throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Empty first name");
 		}
 		if (customer.getLastName() == null) {
-			throw new ApplicationException(ErrorTypes.NULL_DATA, "Null last name");
+			throw new ApplicationException(ErrorTypes.NULL_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Null last name");
 		}
 		if (customer.getLastName().isEmpty()) {
-			throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty last name");
+			throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Empty last name");
 		}
 		if (customer.getEmail() == null) {
-			throw new ApplicationException(ErrorTypes.NULL_DATA, "Null email");
+			throw new ApplicationException(ErrorTypes.NULL_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Null email");
 		}
 		if (customer.getEmail().isEmpty()) {
-			throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty email");
+			throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+					DateUtils.getCurrentDateAndTime() + ": Empty email");
 		}
 	}
 
-
-
-	/*public boolean isCustomerExist(String email) throws ApplicationException {
-		if (this.customerDao.isCustomerExist(email)) {
-			return true;
-		}
-		return false;
+	boolean isCustomerExist(Customer customer) throws ApplicationException {
+		validateCustomerId(customer.getCustomerId(), true);
+		return customerDao.findById(customer.getCustomerId()).isPresent();
 	}
-
-	public boolean isCustomerExist(long customerId) throws ApplicationException {
-		if (this.customerDao.isCustomerExist(customerId)) {
-			return true;
-		}
-		return false;
-	}
-
-	public boolean isCustomerTableExist() throws ApplicationException {
-		if (this.customerDao.isCustomerTableExist()) {
-			return true;
-		}
-		return false;
-	}
-
-	private void ValidateCustomer(Customer customer) throws ApplicationException {
-		if (customer.getFirstName() == null) {
-			throw new ApplicationException(ErrorTypes.NULL_DATA, "Null user");
-		}
-		if (customer.getFirstName().isEmpty()) {
-			throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty user");
-		}
-		if (customer.getEmail() == null) {
-			throw new ApplicationException(ErrorTypes.NULL_DATA, "Null email");
-		}
-		if (customer.getEmail().isEmpty()) {
-			throw new ApplicationException(ErrorTypes.EMPTY_DATA, "Empty email");
-		}
-	}*/
 }

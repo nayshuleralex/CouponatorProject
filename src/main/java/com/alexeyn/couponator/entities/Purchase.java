@@ -11,13 +11,13 @@ public class Purchase implements Serializable {
     @Column(name = "purchaseId")
     private long purchaseId;
 
-    @Column(name = "customerId", unique = false, nullable = false)
+    @Column(name = "customerId", nullable = false)
     private long customerId;
 
-    @Column(name = "couponId", unique = false, nullable = false)
+    @Column(name = "couponId", nullable = false)
     private long couponId;
 
-    @Column(name = "amount", unique = false, nullable = false)
+    @Column(name = "amount", nullable = false)
     private int amount;
 
     @ManyToOne

@@ -18,26 +18,26 @@ public class Coupon implements Serializable {
 	@Column(name = "title", unique = true, nullable = false)
     private String title;
 
-	@Column(name = "startDate", unique = false, nullable = false)
+	@Column(name = "startDate", nullable = false)
 	private Date startDate;
 
-	@Column(name = "endDate", unique = false, nullable = false)
+	@Column(name = "endDate", nullable = false)
 	private Date endDate;
 
-	@Column(name = "price", unique = false, nullable = false)
+	@Column(name = "price", nullable = false)
     private float price;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "type", unique = false, nullable = false)
+	@Column(name = "type", nullable = false)
     private CouponsCategories type;
 
-	@Column(name = "description", unique = false, nullable = false)
+	@Column(name = "description", nullable = false)
     private String description;
 
-	@Column(name = "amount", unique = false, nullable = false)
+	@Column(name = "amount", nullable = false)
     private int amount;
 
-	@Column(name = "companyId", unique = false, nullable = false)
+	@Column(name = "companyId", nullable = false)
     private Long companyId;
 
 	@ManyToOne
