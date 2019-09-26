@@ -20,7 +20,7 @@ public class CompanyController {
     public long createCompany(Company company) throws ApplicationException {
         validateCompany(company);
         validateCompanyId(company.getCompanyId(), false);
-        validateCompanyDoesNotExist(companyDao.findCompanyId(company.getCompanyName()));
+        validateCompanyDoesNotExist(companyDao.findCompanyByCompanyName(company.getCompanyName()));
         return companyDao.save(company).getCompanyId();
     }
 
@@ -78,8 +78,8 @@ public class CompanyController {
         }
     }
 
-    private void validateCompanyDoesNotExist(long companyId) throws ApplicationException {
-        if (companyDao.findById(companyId).isPresent()) {
+    private void validateCompanyDoesNotExist(Company company) throws ApplicationException {
+        if (company != null) {
             throw new ApplicationException(ErrorTypes.COMPANY_ALREADY_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": Company already exist");
         }

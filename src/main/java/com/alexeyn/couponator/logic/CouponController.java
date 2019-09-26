@@ -20,7 +20,7 @@ public class CouponController {
     public long createCoupon(Coupon coupon) throws ApplicationException {
     	validateCoupon(coupon);
     	validateCouponId(coupon.getCouponId(), false); // validate provided id is NULL
-    	validateCouponDoesNotExist(couponDao.findCouponId(coupon.getTitle()));
+    	validateCouponDoesNotExist(couponDao.findCouponByTitle(coupon.getTitle()));
         return couponDao.save(coupon).getCouponId();
     }
 
@@ -83,15 +83,15 @@ public class CouponController {
 		}
     }
 
-    private void validateCouponDoesNotExist(Long couponId) throws ApplicationException {
-		if (couponDao.findById(couponId).isPresent()) {
+    private void validateCouponDoesNotExist(Coupon coupon) throws ApplicationException {
+		if (coupon != null) {
 			throw new ApplicationException(ErrorTypes.COUPON_ALREADY_EXIST,
 					DateUtils.getCurrentDateAndTime() + ": Coupon already exist");
 		}
     }
 
 	private void validateUpdateCoupon(Coupon updatedCoupon) throws ApplicationException {
-		Coupon currentCoupon = couponDao.findById(updatedCoupon.getCompanyId()).get();
+		Coupon currentCoupon = couponDao.findById(updatedCoupon.getCouponId()).get();
 		if (currentCoupon.equals(updatedCoupon)) {
 			throw new ApplicationException(ErrorTypes.UPDATE_FAILED,
 					DateUtils.getCurrentDateAndTime() + ": No difference found between old and new data");

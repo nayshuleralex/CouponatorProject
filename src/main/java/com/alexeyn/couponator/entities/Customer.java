@@ -3,6 +3,7 @@ package com.alexeyn.couponator.entities;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "Customers")
@@ -117,5 +118,22 @@ public class Customer implements Serializable {
                 ", email='" + email + '\'' +
                 ", user=" + user +
                 ']';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return customerId == customer.customerId &&
+                firstName.equals(customer.firstName) &&
+                lastName.equals(customer.lastName) &&
+                address.equals(customer.address) &&
+                email.equals(customer.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customerId, firstName, lastName, address, email);
     }
 }

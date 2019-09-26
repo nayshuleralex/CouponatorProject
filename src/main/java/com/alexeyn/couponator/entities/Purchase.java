@@ -2,6 +2,7 @@ package com.alexeyn.couponator.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "purchases")
@@ -84,5 +85,21 @@ public class Purchase implements Serializable {
                 ", couponId=" + couponId +
                 ", amount=" + amount +
                 ']';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Purchase purchase = (Purchase) o;
+        return purchaseId == purchase.purchaseId &&
+                customerId == purchase.customerId &&
+                couponId == purchase.couponId &&
+                amount == purchase.amount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(purchaseId, customerId, couponId, amount);
     }
 }

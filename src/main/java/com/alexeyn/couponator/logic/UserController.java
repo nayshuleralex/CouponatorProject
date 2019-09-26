@@ -28,7 +28,7 @@ public class UserController {
         validateTable();
         validateUserId(user.getUserId(), false);
         validateUser(user);
-        validateUserDoesNotExist(user.getUserId());
+        validateUserDoesNotExist(userDao.findUserByUsername(user.getUsername()));
         return userDao.save(user).getUserId();
     }
 
@@ -40,8 +40,8 @@ public class UserController {
 
     public User getUser(String username) throws ApplicationException {
         validateTable();
-        validateUserExist(userDao.findByUsername(username).getUserId());
-        return userDao.findByUsername(username);
+        validateUserExist(userDao.findUserByUsername(username).getUserId());
+        return userDao.findUserByUsername(username);
     }
 
     public List<User> getAllUsers() throws ApplicationException {
@@ -50,7 +50,7 @@ public class UserController {
     }
 
     public void updateUser(User user) throws ApplicationException {
-        validateTable();
+//        validateTable();
         validateUser(user);
         validateUserId(user.getUserId(), true);
         validateUserExist(user.getUserId());
@@ -111,8 +111,8 @@ public class UserController {
         }
     }
 
-    private void validateUserDoesNotExist(Long userId) throws ApplicationException {
-        if (userDao.findById(userId).isPresent()) {
+    private void validateUserDoesNotExist(User user) throws ApplicationException {
+        if (user != null) {
             throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": User already exist");
         }
@@ -149,9 +149,9 @@ public class UserController {
             throw new ApplicationException(ErrorTypes.EMPTY_DATA,
                     DateUtils.getCurrentDateAndTime() + ": password is empty");
         }
-        if (isStrongPassword(user.getPassword())) {
+        if (!isStrongPassword(user.getPassword())) {
             throw new ApplicationException(ErrorTypes.INCORRECT_PASSWORD,
-                    DateUtils.getCurrentDateAndTime() + ": Password " + user.getUsername() + " is not strong");
+                    DateUtils.getCurrentDateAndTime() + ": Password " + user.getPassword() + " is not strong");
         }
         if (user.getType() == null) {
             throw new ApplicationException(ErrorTypes.NULL_DATA,

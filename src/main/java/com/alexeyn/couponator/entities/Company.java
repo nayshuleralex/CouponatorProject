@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "companies")
@@ -75,5 +76,20 @@ public class Company implements Serializable {
                 ", companyName='" + companyName + '\'' +
                 ", address='" + address + '\'' +
                 ']';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Company company = (Company) o;
+        return companyId.equals(company.companyId) &&
+                companyName.equals(company.companyName) &&
+                address.equals(company.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(companyId, companyName, address);
     }
 }

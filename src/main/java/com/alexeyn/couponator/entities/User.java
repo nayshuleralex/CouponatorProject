@@ -5,6 +5,7 @@ import com.alexeyn.couponator.enums.UserType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -106,5 +107,22 @@ public class User implements Serializable {
 				", type=" + type +
 				", companyId=" + companyId +
 				']';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		User user = (User) o;
+		return userId.equals(user.userId) &&
+				username.equals(user.username) &&
+				password.equals(user.password) &&
+				type == user.type &&
+				companyId.equals(user.companyId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(userId, username, password, type, companyId);
 	}
 }

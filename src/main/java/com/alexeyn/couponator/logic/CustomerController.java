@@ -20,7 +20,7 @@ public class CustomerController {
 	public long createCustomer(Customer customer) throws ApplicationException {
 		validateCustomer(customer);
 		validateCustomerId(customer.getCustomerId(), false);
-		validateCustomerDoesNotExist(customerDao.findCustomerId(customer.getEmail()));
+		validateCustomerDoesNotExist(customerDao.findCustomerByEmail(customer.getEmail()));
 		long userId = userController.createUser(customer.getUser());
 		customer.setCustomerId(userId);
 		return customerDao.save(customer).getCustomerId();
@@ -79,8 +79,8 @@ public class CustomerController {
 		}
 	}
 
-	private void validateCustomerDoesNotExist(Long couponId) throws ApplicationException {
-		if (customerDao.findById(couponId).isPresent()) {
+	private void validateCustomerDoesNotExist(Customer customer) throws ApplicationException {
+		if (customer == null) {
 			throw new ApplicationException(ErrorTypes.CUSTOMER_ALREADY_EXIST,
 					DateUtils.getCurrentDateAndTime() + ": Customer already exist");
 		}

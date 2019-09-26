@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "coupons")
@@ -149,5 +150,24 @@ public class Coupon implements Serializable {
                 + ", companyID=" + companyId + "]";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coupon coupon = (Coupon) o;
+        return Float.compare(coupon.price, price) == 0 &&
+                amount == coupon.amount &&
+                couponId.equals(coupon.couponId) &&
+                title.equals(coupon.title) &&
+                startDate.equals(coupon.startDate) &&
+                endDate.equals(coupon.endDate) &&
+                type == coupon.type &&
+                description.equals(coupon.description) &&
+                Objects.equals(companyId, coupon.companyId);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(couponId, title, startDate, endDate, price, type, description, amount, companyId);
+    }
 }
