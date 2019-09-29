@@ -16,6 +16,8 @@ public class CouponController {
 
     @Autowired
     private ICouponDao couponDao;
+    @Autowired
+    private CompanyController companyController;
 
     public long createCoupon(Coupon coupon) throws ApplicationException {
     	validateCoupon(coupon);
@@ -145,6 +147,10 @@ public class CouponController {
         }
         if (coupon.getCompanyId() == null) {
             throw new ApplicationException(ErrorTypes.INVALID_ID,
+                    DateUtils.getCurrentDateAndTime() + ": Invalid CompanyID");
+        }
+        if (!companyController.isCompanyExist(coupon.getCompanyId())) {
+            throw new ApplicationException(ErrorTypes.COMPANY_DOES_NOT_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": Invalid CompanyID");
         }
     }

@@ -115,4 +115,8 @@ public class CompanyController {
                     DateUtils.getCurrentDateAndTime() + "Empty company email");
         }
     }
+
+    boolean isCompanyExist(Long companyId) {
+        return companyDao.findById(companyId).isPresent();
+    }
 }

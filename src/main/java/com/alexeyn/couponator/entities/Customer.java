@@ -11,7 +11,7 @@ public class Customer implements Serializable {
 
     @Id
     @Column(name = "customerId", unique = true, nullable = false)
-    private long customerId;
+    private Long customerId;
 
     @Column(name = "firstName", nullable = false)
     private String firstName;
@@ -46,7 +46,7 @@ public class Customer implements Serializable {
 
     // Full constructor without user
 
-    public Customer(long customerId, String firstName, String lastName, String address, String email) {
+    public Customer(Long customerId, String firstName, String lastName, String address, String email) {
         this.customerId = customerId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -54,16 +54,23 @@ public class Customer implements Serializable {
         this.email = email;
     }
 
+    public Customer(String firstName, String lastName, String address, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.email = email;
+    }
+
     // Full constructor
-    public Customer(long customerId, User user, String firstName, String lastName, String address, String email) {
+    public Customer(Long customerId, User user, String firstName, String lastName, String address, String email) {
         this(user, firstName, lastName, address, email);
         this.customerId = customerId;
     }
-    public long getCustomerId() {
+    public Long getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(long userId) {
+    public void setCustomerId(Long userId) {
         this.customerId = userId;
     }
 
@@ -125,7 +132,7 @@ public class Customer implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Customer customer = (Customer) o;
-        return customerId == customer.customerId &&
+        return customerId.equals(customer.customerId) &&
                 firstName.equals(customer.firstName) &&
                 lastName.equals(customer.lastName) &&
                 address.equals(customer.address) &&

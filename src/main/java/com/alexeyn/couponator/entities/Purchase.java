@@ -10,13 +10,13 @@ public class Purchase implements Serializable {
     @Id
     @GeneratedValue
     @Column(name = "purchaseId")
-    private long purchaseId;
+    private Long purchaseId;
 
     @Column(name = "customerId", nullable = false)
-    private long customerId;
+    private Long customerId;
 
     @Column(name = "couponId", nullable = false)
-    private long couponId;
+    private Long couponId;
 
     @Column(name = "amount", nullable = false)
     private int amount;
@@ -32,39 +32,39 @@ public class Purchase implements Serializable {
     }
 
     // Full constructor without id
-    public Purchase(long customerId, long couponId, int amount) {
+    public Purchase(Long customerId, Long couponId, int amount) {
         this.customerId = customerId;
         this.couponId = couponId;
         this.amount = amount;
     }
 
     // Full constructor with id
-    public Purchase(long purchaseId, long customerId, long couponId, int amount) {
+    public Purchase(Long purchaseId, Long customerId, Long couponId, int amount) {
         this(customerId, couponId, amount);
         this.purchaseId = purchaseId;
     }
 
-    public long getPurchaseId() {
+    public Long getPurchaseId() {
         return purchaseId;
     }
 
-    public void setPurchaseId(long purchaseId) {
+    public void setPurchaseId(Long purchaseId) {
         this.purchaseId = purchaseId;
     }
 
-    public long getCustomerId() {
+    public Long getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(long customerId) {
+    public void setCustomerId(Long customerId) {
         this.customerId = customerId;
     }
 
-    public long getCouponId() {
+    public Long getCouponId() {
         return couponId;
     }
 
-    public void setCouponId(long couponId) {
+    public void setCouponId(Long couponId) {
         this.couponId = couponId;
     }
 
@@ -92,9 +92,9 @@ public class Purchase implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Purchase purchase = (Purchase) o;
-        return purchaseId == purchase.purchaseId &&
-                customerId == purchase.customerId &&
-                couponId == purchase.couponId &&
+        return purchaseId.equals(purchase.purchaseId) &&
+                customerId.equals(purchase.customerId) &&
+                couponId.equals(purchase.couponId) &&
                 amount == purchase.amount;
     }
 

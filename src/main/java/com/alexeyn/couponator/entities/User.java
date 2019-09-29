@@ -39,12 +39,12 @@ public class User implements Serializable {
 	}
 
 	// Constructor with id only (in order to create customer)
-	public User(long userId) {
+	public User(Long userId) {
 		this.userId = userId;
 	}
 
 	// Full constructor without id
-	public User(String username, String password, UserType type, long companyId) {
+	public User(String username, String password, UserType type, Long companyId) {
 		this.username = username;
 		this.password = password;
 		this.type = type;
@@ -52,7 +52,7 @@ public class User implements Serializable {
 	}
 
 	// Full constructor with id
-	public User(Long userId, String username, String password, UserType type, long companyId) {
+	public User(Long userId, String username, String password, UserType type, Long companyId) {
 		this(username, password, type, companyId);
 		this.userId = userId;
 	}
@@ -89,11 +89,11 @@ public class User implements Serializable {
 		this.type = type;
 	}
 
-	public long getCompanyId() {
+	public Long getCompanyId() {
 		return companyId;
 	}
 
-	public void setCompanyId(long companyId) {
+	public void setCompanyId(Long companyId) {
 		this.companyId = companyId;
 	}
 
