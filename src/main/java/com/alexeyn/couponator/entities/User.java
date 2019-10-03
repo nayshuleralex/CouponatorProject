@@ -109,20 +109,19 @@ public class User implements Serializable {
 				']';
 	}
 
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		User user = (User) o;
-		return userId.equals(user.userId) &&
-				username.equals(user.username) &&
+		return username.equals(user.username) &&
 				password.equals(user.password) &&
-				type == user.type &&
-				companyId.equals(user.companyId);
+				type == user.type;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(userId, username, password, type, companyId);
+		return Objects.hash(username, password, type);
 	}
 }

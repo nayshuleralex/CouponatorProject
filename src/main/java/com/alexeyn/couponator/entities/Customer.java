@@ -35,8 +35,8 @@ public class Customer implements Serializable {
 
     public Customer() {
     }
+    // Full constructor without customerId
     public Customer(User user, String firstName, String lastName, String address, String email) {
-        // Full constructor without customerId
         this.user = user;
         this.firstName = firstName;
         this.lastName = lastName;

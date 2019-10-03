@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.alexeyn.couponator.entities.Customer;
 import com.alexeyn.couponator.dao.ICustomerDao;
+import com.alexeyn.couponator.entities.User;
 import com.alexeyn.couponator.enums.ErrorTypes;
 import com.alexeyn.couponator.exceptions.ApplicationException;
 import com.alexeyn.couponator.utils.DateUtils;
