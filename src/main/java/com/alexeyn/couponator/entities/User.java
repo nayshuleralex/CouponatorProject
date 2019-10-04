@@ -25,7 +25,7 @@ public class User implements Serializable {
 	@Column(name = "type", nullable = false)
 	private UserType type;
 
-	@Column(name = "companyId", unique = true, nullable = false)
+	@Column(name = "companyId")
 	private Long companyId;
 
 	@OneToOne

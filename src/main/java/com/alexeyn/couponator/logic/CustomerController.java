@@ -128,6 +128,7 @@ public class CustomerController {
 
 	boolean isCustomerExist(Customer customer) throws ApplicationException {
 		validateCustomerId(customer.getCustomerId(), true);
-		return customerDao.findById(customer.getCustomerId()).isPresent();
+		List<Customer> customers = (List<Customer>) customerDao.findAll();
+		return customers.contains(customer);
 	}
 }

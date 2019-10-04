@@ -94,7 +94,7 @@ public class UserController {
         if (isRequired) {
             if (userId == null) {
                 throw new ApplicationException(ErrorTypes.NULL_DATA,
-                        DateUtils.getCurrentDateAndTime() + ": CouponId is not supplied");
+                        DateUtils.getCurrentDateAndTime() + ": UserId is not supplied");
             }
         } else {
             if (userId != null) {
