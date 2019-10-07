@@ -24,7 +24,7 @@ public class UserApi {
 		return this.userController.createUser(user);
 	}
 
-	// method = GET		url = http://localhost:8080/users/42
+	// method = GET		url = http://localhost:8080/users/2?token=1348440385
 	@GetMapping("/{userId}")
 	public User getUser(@PathVariable("userId") long id) throws ApplicationException {
 		return this.userController.getUser(id);
@@ -54,9 +54,9 @@ public class UserApi {
 		this.userController.deleteUser(id);
 	}
 
-	@PostMapping("/login") //change to GetMapping ???
+	@PostMapping("/login") // url = http://localhost:8080/users/login?token=????
 	public LoginResponseDataObject login(@RequestBody UserLoginDetailsDataObject userLoginDetails) throws ApplicationException {
-		return this.userController.login(userLoginDetails.getUserName(), userLoginDetails.getPassword());
+		return this.userController.login(userLoginDetails.getUsername(), userLoginDetails.getPassword());
 	}
 
 	/*public boolean isUserExist(String userName) throws ApplicationException {

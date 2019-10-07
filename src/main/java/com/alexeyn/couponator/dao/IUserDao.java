@@ -12,5 +12,5 @@ public interface IUserDao extends CrudRepository<User, Long> {
     User findUserByUsername(@Param("username") String username);
 
     @Query("SELECT u FROM User u WHERE u.username = :username and u.password = :password")
-    LoggedInUserData login(@Param("username") String userName, @Param("password") String password);
+    User login(@Param("username") String username, @Param("password") String password);
 }

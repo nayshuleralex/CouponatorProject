@@ -10,20 +10,20 @@ public class ApplicationException extends SQLException {
 	 * WHAT THE FUCK IS THIS???
 	 */
 	private static final long serialVersionUID = 1L;
-	private ErrorTypes errorTypes;
+	private ErrorTypes errorType;
 
-	public ApplicationException(Exception e, ErrorTypes errorTypes, String message) {
+	public ApplicationException(Exception e, ErrorTypes errorType, String message) {
 		super(message, e);
-		this.errorTypes = errorTypes;
+		this.errorType = errorType;
 	}
 
-	public ApplicationException(ErrorTypes errorTypes, String message) {
+	public ApplicationException(ErrorTypes errorType, String message) {
 		super(message);
-		this.errorTypes = errorTypes;
+		this.errorType = errorType;
 	}
 
-	public ErrorTypes getErrorTypes() {
-		return errorTypes;
+	public ErrorTypes getErrorType() {
+		return errorType;
 	}
 
 }

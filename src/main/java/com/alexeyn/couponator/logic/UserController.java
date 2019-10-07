@@ -64,23 +64,25 @@ public class UserController {
         userDao.deleteById(userId);
     }
 
-    public LoginResponseDataObject login(String userName, String password) throws ApplicationException {
-        LoggedInUserData loggedInUserData = userDao.login(userName, password);
-        if (loggedInUserData == null) {
-            throw new ApplicationException(ErrorTypes.LOGIN_FAILED, "Failed to login user: " + userName);
+    public LoginResponseDataObject login(String username, String password) throws ApplicationException {
+        User user = userDao.login(username, password);
+        LoggedInUserData loggedInUserData = new LoggedInUserData(user.getType(), user.getCompanyId(), user.getUserId());
+        if (loggedInUserData.getUserId() == null) {
+            throw new ApplicationException(ErrorTypes.LOGIN_FAILED, "Failed to login user: " + username);
         }
-        int token = generateToken(userName, loggedInUserData);
+        int token = generateToken(username, loggedInUserData);
 
+        loggedInUserData.setToken(token);
         // Save login user data in cache
         cacheController.put(token, loggedInUserData);
 
         return new LoginResponseDataObject(token, loggedInUserData.getUserType());
     }
 
-    private int generateToken(String userName, LoggedInUserData loggedInUserData) {
+    private int generateToken(String username, LoggedInUserData loggedInUserData) {
         Random rnd = new Random();
         String salt = "#####";
-        return (userName + rnd.nextInt(9999999) + salt + loggedInUserData.getUserId()).hashCode();
+        return (username + rnd.nextInt(9999999) + salt + loggedInUserData.getUserId()).hashCode();
     }
 
     private void validateTable() throws ApplicationException {

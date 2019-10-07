@@ -157,6 +157,7 @@ public class CouponController {
 
     boolean isCouponExist(Coupon coupon) throws ApplicationException {
         validateCouponId(coupon.getCouponId(), true);
-        return couponDao.findById(coupon.getCompanyId()).isPresent();
+        List<Coupon> coupons = (List<Coupon>) couponDao.findAll();
+        return coupons.contains(coupon);
     }
 }
