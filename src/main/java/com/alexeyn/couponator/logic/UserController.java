@@ -6,6 +6,7 @@ import java.util.Random;
 import com.alexeyn.couponator.cache.ICacheController;
 import com.alexeyn.couponator.data.LoggedInUserData;
 import com.alexeyn.couponator.data.LoginResponseDataObject;
+import com.alexeyn.couponator.entities.Company;
 import com.alexeyn.couponator.entities.User;
 import com.alexeyn.couponator.dao.IUserDao;
 import com.alexeyn.couponator.enums.ErrorTypes;
@@ -28,7 +29,7 @@ public class UserController {
         validateTable();
         validateUserId(user.getUserId(), false);
         validateUser(user);
-        validateUserDoesNotExist(userDao.findUserByUsername(user.getUsername()));
+        validateUserDoesNotExist(user);
         return userDao.save(user).getUserId();
     }
 
@@ -66,17 +67,28 @@ public class UserController {
 
     public LoginResponseDataObject login(String username, String password) throws ApplicationException {
         User user = userDao.login(username, password);
-        LoggedInUserData loggedInUserData = new LoggedInUserData(user.getType(), user.getCompanyId(), user.getUserId());
-        if (loggedInUserData.getUserId() == null) {
+        if (user == null) {
             throw new ApplicationException(ErrorTypes.LOGIN_FAILED, "Failed to login user: " + username);
         }
+        Long userId = user.getUserId();
+        UserType userType = user.getType();
+        Company company = user.getCompany();
+
+        LoggedInUserData loggedInUserData;
+
+        if(company != null) {
+            loggedInUserData = new LoggedInUserData(userType, company.getCompanyId(), userId);
+        }else {
+            loggedInUserData = new LoggedInUserData(userType, userId);
+        }
+
         int token = generateToken(username, loggedInUserData);
 
-        loggedInUserData.setToken(token);
+        loggedInUserData.setToken(token + "");
         // Save login user data in cache
-        cacheController.put(token, loggedInUserData);
+        cacheController.put(String.valueOf(token), loggedInUserData);
 
-        return new LoginResponseDataObject(token, loggedInUserData.getUserType());
+        return new LoginResponseDataObject(token + "", loggedInUserData.getType());
     }
 
     private int generateToken(String username, LoggedInUserData loggedInUserData) {
@@ -86,7 +98,7 @@ public class UserController {
     }
 
     private void validateTable() throws ApplicationException {
-        if (userDao.findAll() == null) {
+        if (userDao.findTableSize() == 0) {
             throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
                     DateUtils.getCurrentDateAndTime() + ": User table is empty.");
         }
@@ -114,7 +126,7 @@ public class UserController {
     }
 
     private void validateUserDoesNotExist(User user) throws ApplicationException {
-        if (user != null) {
+        if (isUserExist(user)) {
             throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": User already exist");
         }
@@ -129,8 +141,6 @@ public class UserController {
     }
 
     private void validateUser(User user) throws ApplicationException {
-        validateTable();
-        List<User> userList = (List<User>) userDao.findAll();
         if (user == null) {
             throw new ApplicationException(ErrorTypes.NULL_DATA,
                     DateUtils.getCurrentDateAndTime() + ": user is null");
@@ -163,10 +173,6 @@ public class UserController {
             throw new ApplicationException(ErrorTypes.USER_TYPE_DOES_NOT_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": user type " + user.getType() + " doesn't exist");
         }
-        if (userList.contains(user)) {
-            throw new ApplicationException(ErrorTypes.USER_ALREADY_EXIST,
-                    DateUtils.getCurrentDateAndTime() + "User " + user.getUsername() + " already exist");
-        }
 
     }
 
@@ -176,5 +182,12 @@ public class UserController {
             return false;
         }
         return password.matches(pattern);
+    }
+
+    public boolean isUserExist(User user) {
+        if (userDao.findUserByUsername(user.getUsername()) == null) {
+            return false;
+        }
+        return true;
     }
 }

@@ -13,4 +13,7 @@ public interface IUserDao extends CrudRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.username = :username and u.password = :password")
     User login(@Param("username") String username, @Param("password") String password);
+
+    @Query("SELECT COUNT(*) FROM User u")
+    Long findTableSize();
 }

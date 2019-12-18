@@ -3,43 +3,47 @@ package com.alexeyn.couponator.data;
 import com.alexeyn.couponator.enums.UserType;
 
 public class LoggedInUserData {
-    private int token;
-    private UserType userType;
-    private Long organizationId;
+    private String token;
+    private UserType type;
+    private Long companyId;
     private Long userId;
 
     public LoggedInUserData() {
     }
 
-    public LoggedInUserData(UserType userType, Long organizationId, Long userId) {
-        super();
-        this.userType = userType;
-        this.organizationId = organizationId;
+    public LoggedInUserData(UserType type, Long companyId, Long userId) {
+        this(type, userId);
+        this.companyId = companyId;
+    }
+
+    public LoggedInUserData(UserType type, Long userId) {
+        this.type = type;
+        this.companyId = null;
         this.userId = userId;
     }
 
-    public int getToken() {
+    public String getToken() {
         return token;
     }
 
-    public void setToken(int token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
-    public UserType getUserType() {
-        return userType;
+    public UserType getType() {
+        return type;
     }
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setType(UserType type) {
+        this.type = type;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getCompanyId() {
+        return companyId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public Long getUserId() {

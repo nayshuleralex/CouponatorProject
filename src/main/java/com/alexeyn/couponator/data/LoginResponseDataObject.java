@@ -4,30 +4,30 @@ package com.alexeyn.couponator.data;
 import com.alexeyn.couponator.enums.UserType;
 
 public class LoginResponseDataObject {
-    private UserType userType;
-    private int token;
+    private UserType type;
+    private String token;
 
-    public LoginResponseDataObject(int token, UserType userType) {
-        this.userType = userType;
+    public LoginResponseDataObject(String token, UserType type) {
+        this.type = type;
         this.token = token;
     }
 
     public LoginResponseDataObject() {
     }
 
-    public UserType getUserType() {
-        return userType;
+    public UserType getType() {
+        return type;
     }
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setType(UserType type) {
+        this.type = type;
     }
 
-    public int getToken() {
+    public String getToken() {
         return token;
     }
 
-    public void setToken(int token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
@@ -35,7 +35,7 @@ public class LoginResponseDataObject {
     @Override
     public String toString() {
         return "LoginResponseDataObject [" +
-                "userType=" + userType +
+                "userType=" + type +
                 ", token=" + token +
                 ']';
     }

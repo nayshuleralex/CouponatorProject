@@ -21,11 +21,11 @@ public class Company implements Serializable {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "companyId", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "company", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Coupon> coupons;
 
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "companyId", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "company", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<User> users;
 

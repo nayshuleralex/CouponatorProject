@@ -1,6 +1,7 @@
 package com.alexeyn.couponator.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,36 +13,33 @@ public class Purchase implements Serializable {
     @Column(name = "purchaseId")
     private Long purchaseId;
 
-    @Column(name = "customerId", nullable = false)
-    private Long customerId;
-
-    @Column(name = "couponId", nullable = false)
-    private Long couponId;
+//    @Column(name = "customerId", nullable = false)
+//    private Long customerId;
+//
+//    @Column(name = "couponId", nullable = false)
+//    private Long couponId;
 
     @Column(name = "amount", nullable = false)
     private int amount;
 
     @ManyToOne
+    @NotNull
+    @JoinColumn(name = "couponId", foreignKey = @ForeignKey(name = "FK_PURCHASE_COUPON_ID"))
     private Coupon coupon;
 
     @ManyToOne
+    @NotNull
+    @JoinColumn(name = "customerId", foreignKey = @ForeignKey(name = "FK_PURCHASE_CUSTOMER_ID"))
     private Customer customer;
 
     // Empty constructor
     public Purchase() {
     }
 
-    // Full constructor without id
-    public Purchase(Long customerId, Long couponId, int amount) {
-        this.customerId = customerId;
-        this.couponId = couponId;
+    public Purchase(int amount, Coupon coupon, Customer customer) {
         this.amount = amount;
-    }
-
-    // Full constructor with id
-    public Purchase(Long purchaseId, Long customerId, Long couponId, int amount) {
-        this(customerId, couponId, amount);
-        this.purchaseId = purchaseId;
+        this.coupon = coupon;
+        this.customer = customer;
     }
 
     public Long getPurchaseId() {
@@ -50,22 +48,6 @@ public class Purchase implements Serializable {
 
     public void setPurchaseId(Long purchaseId) {
         this.purchaseId = purchaseId;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public Long getCouponId() {
-        return couponId;
-    }
-
-    public void setCouponId(Long couponId) {
-        this.couponId = couponId;
     }
 
     public int getAmount() {
@@ -81,8 +63,6 @@ public class Purchase implements Serializable {
     public String toString() {
         return "Purchase [" +
                 "id=" + purchaseId +
-                ", customerId=" + customerId +
-                ", couponId=" + couponId +
                 ", amount=" + amount +
                 ']';
     }
@@ -93,13 +73,11 @@ public class Purchase implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Purchase purchase = (Purchase) o;
         return purchaseId.equals(purchase.purchaseId) &&
-                customerId.equals(purchase.customerId) &&
-                couponId.equals(purchase.couponId) &&
                 amount == purchase.amount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(purchaseId, customerId, couponId, amount);
+        return Objects.hash(purchaseId, amount);
     }
 }

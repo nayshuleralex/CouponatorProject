@@ -12,4 +12,6 @@ public interface ICompanyDao extends CrudRepository<Company, Long> {
     @Query("SELECT c FROM Company c WHERE c.companyName = :companyName")
     Company findCompanyByCompanyName(@Param("companyName") String companyName);
 
+    @Query("SELECT COUNT(*) FROM Company c")
+    Long findTableSize();
 }

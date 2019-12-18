@@ -1,8 +1,11 @@
 package com.alexeyn.couponator.filter;
 
 import com.alexeyn.couponator.cache.ICacheController;
+import com.alexeyn.couponator.consts.Constants;
+import com.alexeyn.couponator.data.LoggedInUserData;
 import com.alexeyn.couponator.data.LoginResponseDataObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -11,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@Order(1)
 public class LoginFilter implements Filter {
 
     @Autowired
@@ -24,31 +28,42 @@ public class LoginFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        if (httpRequest.getMethod().equals("OPTIONS")) {
+            chain.doFilter(httpRequest, response);
+            return;
+        }
 
+        String url = httpRequest.getRequestURL().toString();
 
-        HttpServletRequest req = (HttpServletRequest) request;
-        if (req.getRequestURL().toString().endsWith("/login")) {
-            // A Login request is unnecessary
+        if (url.endsWith("/register")) {
+            chain.doFilter(httpRequest, response);
+            return;
+        }
+
+        if (url.endsWith("/login")) {
+            chain.doFilter(httpRequest, response);
+            return;
+        }
+
+        //String token = request.getParameter("token");
+        String token = httpRequest.getHeader("Authorization");
+
+        LoggedInUserData loggedInUserData = (LoggedInUserData) cacheController.get(token);
+        if (loggedInUserData != null) {
+            //			User not loggedIn
+            //			Move forward to the next filter in chain
+            // TAASE KAVUA
+            request.setAttribute(Constants.USER_DATA_KEY, loggedInUserData);
             chain.doFilter(request, response);
             return;
         }
 
-        String strToken = req.getParameter("token");
-        HttpServletResponse resp = (HttpServletResponse) response;
-        if (strToken == null) {
-            // 401 - Unauthorized in http
-            resp.setStatus(401);
-            return;
-        }
-        int token = Integer.parseInt(strToken);
+        //		token is not in cache or token is null
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        if (cacheController.get(token) == null) {
-            // 401 - Unauthorized in http
-            resp.setStatus(401);
-            return;
-        }
-        chain.doFilter(request, response);
-
+        int unAuthorizedError = 401;
+        httpResponse.setStatus(unAuthorizedError);
     }
 
     @Override

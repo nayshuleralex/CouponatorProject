@@ -9,7 +9,7 @@ import java.util.Map;
 @Controller
 public class CacheController implements ICacheController {
 
-    private Map<Object, Object> cacheMap;
+    private Map<String, Object> cacheMap;
 
     public CacheController() {
         this.cacheMap = new HashMap<>();
@@ -21,7 +21,7 @@ public class CacheController implements ICacheController {
     }
 
     @Override
-    public void put(Object key, Object value) {
+    public void put(String key, Object value) {
         this.cacheMap.put(key, value);
     }
 

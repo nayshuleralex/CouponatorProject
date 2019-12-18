@@ -38,13 +38,11 @@ public class Coupon implements Serializable {
 	@Column(name = "amount", nullable = false)
     private int amount;
 
-	@Column(name = "companyId", nullable = false)
-    private Long companyId;
-
 	@ManyToOne
+    @JoinColumn(name = "companyId", foreignKey = @ForeignKey(name = "FK_COUPON_COMPANY_ID"))
 	private Company company;
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "couponId")
+	@OneToMany(mappedBy = "coupon", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	private List<Purchase> purchases;
 
 	// Empty constructor
@@ -52,8 +50,7 @@ public class Coupon implements Serializable {
     }
 
     // Full constructor without id
-	public Coupon(String title, Date startDate, Date endDate, float price, CouponsCategories type, String description, int amount,
-				  Long companyId) {
+	public Coupon(String title, Date startDate, Date endDate, float price, CouponsCategories type, String description, int amount) {
 		this.title = title;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -61,13 +58,12 @@ public class Coupon implements Serializable {
 		this.type = type;
 		this.description = description;
 		this.amount = amount;
-		this.companyId = companyId;
 	}
 
 	// Full constructor with id
     public Coupon(long couponId, String title, Date startDate, Date endDate, float price, CouponsCategories type, String description,
-                  int amount, Long companyId) {
-    	this(title, startDate, endDate, price, type, description, amount, companyId);
+                  int amount) {
+    	this(title, startDate, endDate, price, type, description, amount);
         this.couponId = couponId;
     }
 
@@ -135,19 +131,12 @@ public class Coupon implements Serializable {
         this.amount = amount;
     }
 
-    public Long getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
-    }
 
     @Override
     public String toString() {
         return "Coupon [id=" + couponId + ", title=" + title + ", startDate=" + startDate + ", endDate=" + endDate
                 + ", price=" + price + ", type=" + type + ", description=" + description + ", amount=" + amount
-                + ", companyID=" + companyId + "]";
+                + "]";
     }
 
     @Override
@@ -162,12 +151,11 @@ public class Coupon implements Serializable {
                 startDate.equals(coupon.startDate) &&
                 endDate.equals(coupon.endDate) &&
                 type == coupon.type &&
-                description.equals(coupon.description) &&
-                Objects.equals(companyId, coupon.companyId);
+                description.equals(coupon.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(couponId, title, startDate, endDate, price, type, description, amount, companyId);
+        return Objects.hash(couponId, title, startDate, endDate, price, type, description, amount);
     }
 }

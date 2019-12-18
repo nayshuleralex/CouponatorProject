@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.alexeyn.couponator.logic.CouponController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -30,15 +31,17 @@ public class CouponApi {
 
 	// method = GET		url = http://localhost:8080/coupons
 	@GetMapping
-	public List<Coupon> getAllCoupons() throws ApplicationException {
+	@RequestMapping
+	public List<Coupon> getAllCoupons(HttpServletRequest request) throws ApplicationException {
 		return this.couponController.getAllCoupons();
 	}
 
 	// method = GET		url = http://localhost:8080/coupons/byCompanyId?companyId=42
-	@GetMapping("/byCompanyId")
+	/*@GetMapping("/byCompanyId")
 	public List<Coupon> getAllCoupons(@RequestParam("companyId") long companyId) throws ApplicationException {
+
 		return this.couponController.getAllCoupons(companyId);
-	}
+	}*/
 
 	// method = PUT		url = http://localhost:8080/coupons
 	@PutMapping

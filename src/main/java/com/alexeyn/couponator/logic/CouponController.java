@@ -1,5 +1,6 @@
 package com.alexeyn.couponator.logic;
 
+import java.util.Date;
 import java.util.List;
 
 import com.alexeyn.couponator.entities.Coupon;
@@ -36,10 +37,10 @@ public class CouponController {
         return (List<Coupon>) couponDao.findAll();
     }
 
-    public List<Coupon> getAllCoupons(long companyId) throws ApplicationException {
+/*    public List<Coupon> getAllCoupons(long companyId) throws ApplicationException {
     	validateTable();
         return couponDao.findAllByCompanyId(companyId);
-    }
+    }*/
 
     public void updateCoupon(Coupon coupon) throws ApplicationException {
     	validateTable();
@@ -56,9 +57,13 @@ public class CouponController {
         couponDao.deleteById(couponId);
     }
 
+    public void updateAmountOfCoupons(long couponId, int amount) throws ApplicationException {
+        couponDao.updateAmountOfCoupons(couponId, amount);
+    }
+
 
     private void validateTable() throws ApplicationException {
-        if (couponDao.findAll() == null) {
+        if (couponDao.findTableSize() == 0) {
             throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
                     DateUtils.getCurrentDateAndTime() + ": Coupon Table is empty");
         }
@@ -145,19 +150,17 @@ public class CouponController {
             throw new ApplicationException(ErrorTypes.COUPON_TYPE_DOES_NOT_EXIST,
                     DateUtils.getCurrentDateAndTime() + ": Coupon type " + coupon.getType() + " doesn't exist");
         }
-        if (coupon.getCompanyId() == null) {
-            throw new ApplicationException(ErrorTypes.INVALID_ID,
-                    DateUtils.getCurrentDateAndTime() + ": Invalid CompanyID");
-        }
-        if (!companyController.isCompanyExist(coupon.getCompanyId())) {
-            throw new ApplicationException(ErrorTypes.COMPANY_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": Invalid CompanyID");
-        }
     }
 
     boolean isCouponExist(Coupon coupon) throws ApplicationException {
         validateCouponId(coupon.getCouponId(), true);
-        List<Coupon> coupons = (List<Coupon>) couponDao.findAll();
-        return coupons.contains(coupon);
+        if (couponDao.findCouponByTitle(coupon.getTitle()) == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public void deleteAllExpiredCoupons(Date date) throws ApplicationException{
+        couponDao.deleteAllExpiredCoupons(date);
     }
 }

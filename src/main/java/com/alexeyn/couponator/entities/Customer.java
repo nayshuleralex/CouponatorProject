@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Customers")
+@Table(name = "customers")
 public class Customer implements Serializable {
 
     @Id
@@ -25,10 +25,11 @@ public class Customer implements Serializable {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "customerId")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "customer")
     private List<Purchase> purchases;
 
     @OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "userId",foreignKey = @ForeignKey(name = "FK_CUSTOMER_USER_ID"))
     private User user;
 
     // Empty constructor

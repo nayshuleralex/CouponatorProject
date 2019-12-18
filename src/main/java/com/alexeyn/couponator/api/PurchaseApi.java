@@ -1,5 +1,8 @@
 package com.alexeyn.couponator.api;
 
+import com.alexeyn.couponator.consts.Constants;
+import com.alexeyn.couponator.data.LoggedInUserData;
+import com.alexeyn.couponator.data.PurchaseDataObject;
 import com.alexeyn.couponator.entities.Customer;
 import com.alexeyn.couponator.entities.Purchase;
 import com.alexeyn.couponator.entities.Coupon;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.alexeyn.couponator.logic.PurchaseController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -19,13 +23,16 @@ public class PurchaseApi {
 
     @Autowired
     private PurchaseController purchaseController;
+	@Autowired
     private CustomerController customerController;
+	@Autowired
     private CouponController couponController;
 
 	// method = POST	url = http://localhost:8080/purchases
     @PostMapping
-    public long createPurchase(@RequestBody Purchase purchase) throws ApplicationException {
-        return this.purchaseController.createPurchase(purchase);
+    public void createPurchase(@RequestBody PurchaseDataObject purchase, HttpServletRequest request) throws ApplicationException {
+		LoggedInUserData userData = (LoggedInUserData) request.getAttribute(Constants.USER_DATA_KEY);
+        this.purchaseController.createPurchase(purchase, userData);
     }
 
 	// method = GET		url = http://localhost:8080/purchases
@@ -35,18 +42,18 @@ public class PurchaseApi {
 	}
 
 	// method = GET		url = http://localhost:8080/purchases/byCustomerId?customerId=42
-	@GetMapping("/byCustomerId")
+	/*@GetMapping("/byCustomerId")
 	public List<Purchase> getAllCustomerPurchases(@RequestParam("customerId") long id) throws ApplicationException {
 		Customer customer = customerController.getCustomer(id);
 		return this.purchaseController.getAllCustomerPurchases(customer);
-	}
+	}*/
 
 	// method = GET		url = http://localhost:8080/purchases/byCustomerId?customerId=42
-	@GetMapping("/byCouponId")
+	/*@GetMapping("/byCouponId")
 	public List<Purchase> getAllCouponPurchases(@RequestParam("couponId") long id) throws ApplicationException {
 		Coupon coupon = couponController.getCoupon(id);
 		return this.purchaseController.getAllCouponPurchases(coupon);
-	}
+	}*/
 
 	// method = PUT		url = http://localhost:8080/purchases
 	@PutMapping

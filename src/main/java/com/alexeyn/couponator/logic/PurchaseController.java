@@ -2,15 +2,21 @@ package com.alexeyn.couponator.logic;
 
 import java.util.List;
 
+import com.alexeyn.couponator.data.LoggedInUserData;
+import com.alexeyn.couponator.data.PurchaseDataObject;
 import com.alexeyn.couponator.entities.Coupon;
 import com.alexeyn.couponator.entities.Customer;
 import com.alexeyn.couponator.entities.Purchase;
 import com.alexeyn.couponator.dao.IPurchaseDao;
+import com.alexeyn.couponator.entities.User;
 import com.alexeyn.couponator.enums.ErrorTypes;
+import com.alexeyn.couponator.enums.UserType;
 import com.alexeyn.couponator.exceptions.ApplicationException;
 import com.alexeyn.couponator.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import javax.transaction.Transactional;
 
 @Controller
 public class PurchaseController {
@@ -22,10 +28,13 @@ public class PurchaseController {
     private CustomerController customerController;
 
 
-    public long createPurchase(Purchase purchase) throws ApplicationException {
-        validatePurchase(purchase);
-        validatePurchaseId(purchase.getPurchaseId(), false);
-        return purchaseDao.save(purchase).getPurchaseId();
+    @Transactional
+    public void createPurchase(PurchaseDataObject purchaseData, LoggedInUserData loggedInUserData) throws ApplicationException {
+        validatePurchase(purchaseData);
+        validateLoggedInUserData(loggedInUserData);
+//        validatePurchaseId(purchase.getPurchaseId(), false);
+        Purchase purchase = createPurchaseFromPurchaseDataObject(purchaseData, loggedInUserData);
+        purchaseDao.save(purchase);
     }
 
     public Purchase getPurchase(long purchaseId) throws ApplicationException {
@@ -36,16 +45,6 @@ public class PurchaseController {
 
     public List<Purchase> getAllPurchases() throws ApplicationException {
         return (List<Purchase>) purchaseDao.findAll();
-    }
-
-    public List<Purchase> getAllCouponPurchases(Coupon coupon) throws ApplicationException {
-        validateCouponExist(coupon);
-        return purchaseDao.findAllByCouponId(coupon.getCouponId());
-    }
-
-   public List<Purchase> getAllCustomerPurchases(Customer customer) throws ApplicationException {
-        validateCustomerExist(customer);
-        return purchaseDao.findAllByCustomerId(customer.getCustomerId());
     }
 
     public void updatePurchase(Purchase purchase) throws ApplicationException {
@@ -61,8 +60,24 @@ public class PurchaseController {
         purchaseDao.deleteById(purchaseId);
     }
 
+    @Transactional
+    private Purchase createPurchaseFromPurchaseDataObject(PurchaseDataObject purchaseData, LoggedInUserData userData) throws ApplicationException {
+        Coupon coupon = couponController.getCoupon(purchaseData.getCouponId());
+        long couponId = coupon.getCouponId();
+        int currentAmountOfCoupons = coupon.getAmount();
+        int amountOfCouponsToBuy = purchaseData.getAmount();
+        int updatedCouponAmount = (currentAmountOfCoupons - amountOfCouponsToBuy);
+        couponController.updateAmountOfCoupons(couponId, updatedCouponAmount);
+
+        Customer customer = new Customer();
+        User user = new User();
+        user.setUserId(userData.getUserId());
+        customer = this.customerController.getCustomer(user.getUserId());
+        return new Purchase(amountOfCouponsToBuy, coupon, customer);
+    }
+
     private void validateTable() throws ApplicationException {
-        if (purchaseDao.findAll() == null) {
+        if (purchaseDao.findTableSize() == 0) {
             throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
                     DateUtils.getCurrentDateAndTime() + ": Purchase Table is empty");
         }
@@ -79,6 +94,39 @@ public class PurchaseController {
                 throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
                         DateUtils.getCurrentDateAndTime() + ": Id is redundant");
             }
+        }
+    }
+
+    private void validateLoggedInUserData(LoggedInUserData loggedInUserData) throws ApplicationException {
+        if (loggedInUserData == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + "loggedInUserData is empty");
+        }
+        if (loggedInUserData.getUserId() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + "userId is Null");
+        }
+        if (loggedInUserData.getType() == null) {
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + "userType is Null");
+        }
+        if (!loggedInUserData.getType().equals(UserType.CUSTOMER)) {
+            throw new ApplicationException(ErrorTypes.INVALID_USER_TYPE,
+                    DateUtils.getCurrentDateAndTime() + "UserType: " + loggedInUserData.getType() + " not allowed to purchase");
+        }
+        if (loggedInUserData.getToken() == null) {
+            // Or hacking attempt?
+            throw new ApplicationException(ErrorTypes.NULL_DATA,
+                    DateUtils.getCurrentDateAndTime() + "token is null");
+        }
+        if (loggedInUserData.getToken().isEmpty()) {
+            // Or hacking attempt?
+            throw new ApplicationException(ErrorTypes.EMPTY_DATA,
+                    DateUtils.getCurrentDateAndTime() + "token is empty");
+        }
+        if (loggedInUserData.getCompanyId() != null) {
+            throw new ApplicationException(ErrorTypes.REDUNDANT_DATA,
+                    DateUtils.getCurrentDateAndTime() + "User has companyId");
         }
     }
 
@@ -104,7 +152,7 @@ public class PurchaseController {
         }
     }
 
-    private void validatePurchase(Purchase purchase) throws ApplicationException {
+    private void validatePurchase(PurchaseDataObject purchase) throws ApplicationException {
         if (purchase == null) {
             throw new ApplicationException(ErrorTypes.NULL_DATA,
                     DateUtils.getCurrentDateAndTime() + ":Purchase is null");
@@ -112,22 +160,6 @@ public class PurchaseController {
         if (purchase.getAmount() <= 0) {
             throw new ApplicationException(ErrorTypes.INVALID_AMOUNT,
                     DateUtils.getCurrentDateAndTime() + ": Purchase has invalid Amount");
-        }
-        if (purchase.getCouponId() < 0) {
-            throw new ApplicationException(ErrorTypes.INVALID_ID,
-                    DateUtils.getCurrentDateAndTime() + ": Purchase has invalid CouponID");
-        }
-        if (!couponController.isCouponExist(couponController.getCoupon(purchase.getCouponId()))) {
-            throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": CouponID doesn't exist");
-        }
-        if (purchase.getCustomerId() < 0) {
-            throw new ApplicationException(ErrorTypes.INVALID_ID,
-                    DateUtils.getCurrentDateAndTime() + ": Purchase has invalid CustomerID");
-        }
-        if (!customerController.isCustomerExist(customerController.getCustomer(purchase.getCustomerId()))) {
-            throw new ApplicationException(ErrorTypes.ID_DOES_NOT_EXIST,
-                    DateUtils.getCurrentDateAndTime() + ": CustomerID doesn't exist");
         }
     }
 

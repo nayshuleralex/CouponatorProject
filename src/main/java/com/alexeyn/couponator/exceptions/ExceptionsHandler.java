@@ -1,37 +1,48 @@
 package com.alexeyn.couponator.exceptions;
 
-import org.springframework.web.bind.annotation.ControllerAdvice;
+
+import com.alexeyn.couponator.enums.ErrorTypes;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import javax.servlet.http.HttpServletResponse;
 
 
-@ControllerAdvice
-public class ExceptionsHandler implements ExceptionMapper<Throwable> {
+// Exception handler class
+@RestControllerAdvice
+public class ExceptionsHandler {
+    //	Response - Object in Spring
+    @ExceptionHandler
+    @ResponseBody
+    // Variable name is throwable in order to remember that it handles Exception and Error
+//	Spring do injection to a familiar variable - like HttpServletResponse
+    public ErrorBean toResponse(Throwable throwable, HttpServletResponse response) {
 
-    @ExceptionHandler()
-    public Response toResponse(Throwable exception) {
-        if (exception instanceof ApplicationException) {
-            ApplicationException e = (ApplicationException) exception;
-            int internalErrorCode = e.getErrorType().getInternalErrorCode();
-            String internalMessage = e.getMessage();
-            String externalMessage = e.getErrorType().getErrorMessage();
-            ErrorBean errorBean = new ErrorBean(internalErrorCode, internalMessage, externalMessage);
-            if (e.getErrorType().isCritical()) {
-                e.printStackTrace();
+        //	ErrorBean errorBean;
+        if(throwable instanceof ApplicationException) {
+            ApplicationException appException = (ApplicationException) throwable;
+
+            ErrorTypes errorType = appException.getErrorType();
+            int errorNumber = errorType.getInternalErrorCode();
+            String errorMessage = errorType.getErrorMessage();
+            String errorName = errorType.name();
+
+            ErrorBean errorBean = new ErrorBean(errorNumber, errorMessage, errorName);
+            if(appException.getErrorType().isCritical()) {
+                appException.printStackTrace();
             }
-            return Response.status(e.getErrorCode()).entity(errorBean).build();
 
-        } else if (exception instanceof Exception) {
-            String internalMessage = exception.getMessage();
-            ErrorBean errorBean = new ErrorBean(601, internalMessage, "General error");
-            exception.printStackTrace();
-            return Response.status(601).entity(errorBean).build();
+            response.setStatus(errorNumber);
+            return errorBean;
         }
-        exception.printStackTrace();
-        return Response.status(500).entity(null).build();
+
+        String errorMessage = throwable.getMessage();
+        ErrorBean errorBean = new ErrorBean(601, errorMessage, "General error");
+        throwable.printStackTrace();
+
+
+        response.setStatus(errorBean.getInternalErrorCode());
+        return errorBean;
     }
-
-
 }

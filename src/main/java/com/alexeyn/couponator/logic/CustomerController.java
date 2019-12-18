@@ -53,7 +53,7 @@ public class CustomerController {
 	}
 
 	private void validateTable() throws ApplicationException {
-		if (customerDao.findAll() == null) {
+		if (customerDao.findTableSize() == 0) {
 			throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
 					DateUtils.getCurrentDateAndTime() + ": Customer Table is empty");
 		}
@@ -128,7 +128,9 @@ public class CustomerController {
 
 	boolean isCustomerExist(Customer customer) throws ApplicationException {
 		validateCustomerId(customer.getCustomerId(), true);
-		List<Customer> customers = (List<Customer>) customerDao.findAll();
-		return customers.contains(customer);
+		if (customerDao.findCustomerByEmail(customer.getEmail()) == null) {
+			return false;
+		}
+		return true;
 	}
 }

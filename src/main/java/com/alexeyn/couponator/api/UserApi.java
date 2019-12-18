@@ -54,9 +54,15 @@ public class UserApi {
 		this.userController.deleteUser(id);
 	}
 
-	@PostMapping("/login") // url = http://localhost:8080/users/login?token=????
+	@PostMapping("/login") // url = http://localhost:8080/users/login
 	public LoginResponseDataObject login(@RequestBody UserLoginDetailsDataObject userLoginDetails) throws ApplicationException {
-		return this.userController.login(userLoginDetails.getUsername(), userLoginDetails.getPassword());
+
+		String username = userLoginDetails.getUsername();
+		String password = userLoginDetails.getPassword();
+
+		LoginResponseDataObject loginResponseDataObject = this.userController.login(username, password);
+
+		return loginResponseDataObject;
 	}
 
 	/*public boolean isUserExist(String userName) throws ApplicationException {

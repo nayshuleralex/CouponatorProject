@@ -51,7 +51,7 @@ public class CompanyController {
     }
 
     private void validateTable() throws ApplicationException {
-        if (companyDao.findAll() == null) {
+        if (companyDao.findTableSize() == 0) {
             throw new ApplicationException(ErrorTypes.EMPTY_TABLE,
                     DateUtils.getCurrentDateAndTime() + ": Empty company table");
         }
